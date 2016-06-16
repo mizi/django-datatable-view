@@ -72,7 +72,7 @@ def resolve_orm_path(model, orm_path):
     if bits[-1] == 'pk':
         field = endpoint_model._meta.pk
     else:
-        field, _, _, _ = endpoint_model._meta.get_field_by_name(bits[-1])
+        field = endpoint_model._meta.get_field(bits[-1])
     return field
 
 def get_model_at_related_field(model, attr):
@@ -83,11 +83,11 @@ def get_model_at_related_field(model, attr):
     """
 
     try:
-        field, _, direct, m2m = model._meta.get_field_by_name(attr)
+        field = model._meta.get_field(attr)
     except FieldDoesNotExist:
         raise
 
-    if not direct:
+    if field.auto_created and not field.concrete:
         if hasattr(field, 'related_model'):  # Reverse relationship
             # -- Django >=1.8 mode
             return field.related_model
@@ -118,7 +118,7 @@ def contains_plural_field(model, fields):
         model = source_model
         bits = orm_path.lstrip('+-').split('__')
         for bit in bits[:-1]:
-            field, _, direct, m2m = model._meta.get_field_by_name(bit)
+            field = model._meta.get_field(bit)
             if isinstance(field, models.ManyToManyField) \
                     or (USE_RELATED_OBJECT and isinstance(field, RelatedObject) and field.field.rel.multiple) \
                     or (not USE_RELATED_OBJECT and isinstance(field, RelatedField) and field.one_to_many):

@@ -9,8 +9,6 @@ try:
 except ImportError:
     pass
 
-from django.db import models
-from django.db.models import Count
 from django.db.models.fields import FieldDoesNotExist
 from django.template.loader import render_to_string
 try:
@@ -26,10 +24,10 @@ import six
 
 
 from .exceptions import ColumnError, SkipRecord
-from .columns import (Column, TextColumn, DateColumn, DateTimeColumn, BooleanColumn, IntegerColumn,
-                      FloatColumn, DisplayColumn, CompoundColumn, get_column_for_modelfield)
+from .columns import (Column, TextColumn, get_column_for_modelfield)
 from .utils import (OPTION_NAME_MAP, MINIMUM_PAGE_LENGTH, contains_plural_field, split_terms,
                     resolve_orm_path)
+
 
 def pretty_name(name):
     if not name:
@@ -81,7 +79,8 @@ def columns_for_model(model, fields=None, exclude=None, labels=None, processors=
         )
     return field_dict
 
-# Borrowed from the Django forms implementation 
+
+# Borrowed from the Django forms implementation
 def get_declared_columns(bases, attrs, with_base_columns=True):
     """
     Create a list of form field instances from the passed in 'attrs', plus any
@@ -114,6 +113,7 @@ def get_declared_columns(bases, attrs, with_base_columns=True):
 
     return OrderedDict(local_columns)
 
+
 class DatatableOptions(object):
     def __init__(self, options=None):
         self.model = getattr(options, 'model', None)
@@ -137,6 +137,7 @@ class DatatableOptions(object):
 
 
 default_options = DatatableOptions()
+
 
 class DatatableMetaclass(type):
     """
@@ -402,6 +403,8 @@ class Datatable(six.with_metaclass(DatatableMetaclass)):
             i_begin = self.config['start_offset']
             i_end = self.config['start_offset'] + self.config['page_length']
             object_list = self._records[i_begin:i_end]
+        else:
+            object_list = self._records
 
         return object_list
 
@@ -660,7 +663,6 @@ class Datatable(six.with_metaclass(DatatableMetaclass)):
             return f
 
         return None
-
 
     # Template rendering features
     def __str__(self):
